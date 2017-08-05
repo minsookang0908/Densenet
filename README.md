@@ -120,7 +120,7 @@ python main.py \
 
 ## Performance
 
-I trained DenseNet-40 and DenseNet-BC-100 variants on the CIFAR-10 dataset but was not able to reproduce the author's results. I don't know if this stems from an error in the implementation, an unlucky seed...
+I trained DenseNet-40 and DenseNet-BC-100 variants on the CIFAR-10 dataset but was not able to reproduce the author's results. I don't know if this stems from an error in the implementation or an unlucky seed... Training the 2 models in parallel took 2 days to complete on a p2.xlarge AWS instance with 1 GPU. If I get the time, I'll create clean, minimal instructions for setting up a similar instance for free.
 
 | Model           | Test Error |
 |-----------------|------------|
