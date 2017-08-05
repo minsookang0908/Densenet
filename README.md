@@ -38,11 +38,11 @@ usage: main.py [-h] [--num_blocks NUM_BLOCKS]
                [--valid_size VALID_SIZE] [--batch_size BATCH_SIZE]
                [--num_worker NUM_WORKER] [--augment AUGMENT]
                [--shuffle SHUFFLE] [--show_sample SHOW_SAMPLE]
-               [--is_train IS_TRAIN] [--epochs EPOCHS] [--lr LR]
+               [--is_train IS_TRAIN] [--epochs EPOCHS] [--init_lr INIT_LR]
                [--momentum MOMENTUM] [--weight_decay WEIGHT_DECAY]
-               [--dropout_rate DROPOUT_RATE] [--random_seed RANDOM_SEED]
-               [--data_dir DATA_DIR] [--ckpt_dir CKPT_DIR]
-               [--logs_dir LOGS_DIR] [--num_gpu NUM_GPU]
+               [--lr_decay LR_DECAY] [--dropout_rate DROPOUT_RATE]
+               [--random_seed RANDOM_SEED] [--data_dir DATA_DIR]
+               [--ckpt_dir CKPT_DIR] [--logs_dir LOGS_DIR] [--num_gpu NUM_GPU]
                [--use_tensorboard USE_TENSORBOARD] [--resume RESUME]
                [--print_freq PRINT_FREQ]
 
@@ -80,10 +80,14 @@ Data:
 Training:
   --is_train IS_TRAIN   Whether to train or test the model
   --epochs EPOCHS       # of epochs to train for
-  --lr LR               Initial learning rate value
+  --init_lr INIT_LR     Initial learning rate value
   --momentum MOMENTUM   Nesterov momentum value
   --weight_decay WEIGHT_DECAY
                         weight decay penalty
+  --lr_decay LR_DECAY, --list LR_DECAY
+                        List containing fractions of the total number of
+                        epochs in which the learning rate is decayed. Enter
+                        empty string if you want a constant lr.
   --dropout_rate DROPOUT_RATE
                         Dropout rate used with non-augmented datasets
 

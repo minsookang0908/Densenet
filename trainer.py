@@ -51,11 +51,11 @@ class Trainer(object):
         self.momentum = config.momentum
         self.weight_decay = config.weight_decay
         self.dropout_rate = config.dropout_rate
-        if config.lr_sched == '':
+        if config.lr_decay == '':
             self.is_decay = False
         else:
-            self.lr_decay = [float(x) for x in config.lr_sched.split(',')]
-
+            self.lr_decay = [float(x) for x in config.lr_decay.split(',')]
+            
         # other params
         self.ckpt_dir = config.ckpt_dir
         self.logs_dir = config.logs_dir
