@@ -55,7 +55,7 @@ class Trainer(object):
             self.is_decay = False
         else:
             self.lr_decay = [float(x) for x in config.lr_decay.split(',')]
-            
+
         # other params
         self.ckpt_dir = config.ckpt_dir
         self.logs_dir = config.logs_dir
@@ -114,7 +114,7 @@ class Trainer(object):
         for epoch in trange(self.start_epoch, self.epochs):
             
             # decay learning rate
-            if self.decay:
+            if self.is_decay:
                 self.anneal_learning_rate(epoch)
 
             # train for 1 epoch
@@ -337,8 +337,8 @@ class Trainer(object):
         t1 and t2 are floats specified by the user. The default
         values used by the authors of the paper are 0.5 and 0.75.
         """
-        sched1 = int(self.lr_sched[0] * self.epochs)
-        sched2 = int(self.lr_sched[1] * self.epochs)
+        sched1 = int(self.lr_decay[0] * self.epochs)
+        sched2 = int(self.lr_decay[1] * self.epochs)
 
         self.lr = self.init_lr * (0.1 ** (epoch // sched1)) \
                                * (0.1 ** (epoch // sched2))
