@@ -4,7 +4,12 @@ This is a PyTorch implementation of the DenseNet architecture as described in [D
 
 <p align="center">
  <img src="./assets/denseblock.png" alt="Drawing" width="50%">
-</p> 
+</p>
+
+## To-do
+
+- [ ] Multi-GPU support
+- [ ] Unique model checkpointing (clashes can currently occur)
 
 ## Requirements
 
