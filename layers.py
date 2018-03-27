@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from math import floor
-
+from math import sqrt as sqrt
 class SubBlock(nn.Module):
     """
     This piece of the DenseBlock receives an input feature map
@@ -42,13 +42,12 @@ class SubBlock(nn.Module):
             self.conv1 = nn.Conv2d(in_channels_1,
                                    out_channels_1,
                                    kernel_size=1)
-
+            print ('bottle_neck')
         self.bn2 = nn.BatchNorm2d(in_channels_2)
         self.conv2 = nn.Conv2d(in_channels_2, 
                                out_channels_2, 
                                kernel_size=3, 
                                padding=1)
-
     def forward(self, x):
         """
         Compute the forward pass of the composite transformation H(x),
@@ -139,7 +138,6 @@ class TransitionLayer(nn.Module):
                               self.out_channels, 
                               kernel_size=1)
         self.pool = nn.AvgPool2d(2)
-
     def forward(self, x):
         out = self.pool(self.conv(F.relu(self.bn(x))))
         if self.p > 0:

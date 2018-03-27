@@ -78,7 +78,7 @@ class DenseNet(nn.Module):
 
         # ================================== #
         # initial convolutional layer
-        out_channels = 16
+        out_channels = 2 * growth_rate
         if bottleneck:
             out_channels = 2 * growth_rate
         self.conv = nn.Conv2d(3,
@@ -86,11 +86,10 @@ class DenseNet(nn.Module):
                               kernel_size=3,
                               padding=1)
         # ================================== #
-
         # ================================== #
         # dense blocks and transition layers 
         blocks = []
-        for i in range(num_blocks - 1):
+        for i in range(num_blocks-1):
             # dense block
             dblock = DenseBlock(num_layers_dense, 
                                 out_channels, 
@@ -101,6 +100,7 @@ class DenseNet(nn.Module):
 
             # transition block
             out_channels = dblock.out_channels
+            
             trans = TransitionLayer(out_channels, theta, p)
             blocks.append(trans)
             out_channels = trans.out_channels
@@ -114,29 +114,38 @@ class DenseNet(nn.Module):
                             bottleneck, 
                             p)
         blocks.append(dblock)
+        
         self.block = nn.Sequential(*blocks)
         self.out_channels = dblock.out_channels
         # ================================== #
 
         # ================================== #
         # fully-connected layer
+        self.lastbn = nn.BatchNorm2d(self.out_channels)
         self.fc = nn.Linear(self.out_channels, num_classes)
         # ================================== #
 
         # ================================== #
         # He et. al weight initialization
+        numbering = 0
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, sqrt(2. / n))
-        # ================================== #
-
+               # print (m.output_channels)
+                n = m.kernel_size[0]  * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0,sqrt(2./n))
+  # ================================== #
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant(m.weight,1)
+                nn.init.constant(m.bias,0)
+            elif isinstance(m, nn.Linear):
+                nn.init.constant(m.bias,0)
     def forward(self, x):
         """
         Run the forward pass of the DenseNet model.
         """
         out = self.conv(x)
         out = self.block(out)
+        out = F.relu(self.lastbn(out))
         out = F.avg_pool2d(out, 8)
         out = out.view(-1, self.out_channels)
         out = self.fc(out)

@@ -56,7 +56,7 @@ train_arg.add_argument('--lr_decay', '--list', type=str, default='0.5,0.75',
                             help='List containing fractions of the total number \
                                   of epochs in which the learning rate is decayed. \
                                   Enter empty string if you want a constant lr.')
-train_arg.add_argument('--dropout_rate', type=float, default=0.0,
+train_arg.add_argument('--dropout_rate', type=float, default=0.2,
                             help='Dropout rate used with non-augmented datasets')
 
 # other params
@@ -75,7 +75,7 @@ misc_arg.add_argument('--use_tensorboard', type=str2bool, default=False,
                         help='Whether to use tensorboard for visualization')
 misc_arg.add_argument('--resume', type=str2bool, default=False,
                         help='Whether to resume training from most recent checkpoint')
-misc_arg.add_argument('--print_freq', type=int, default=10,
+misc_arg.add_argument('--print_freq', type=int, default=100,
                         help='How frequently to display training details on screen')
 
 def get_config():

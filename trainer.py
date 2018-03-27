@@ -18,7 +18,7 @@ class Trainer(object):
     of the model given hyperparameters constraints provided by the 
     user in the config file.
     """
-    def __init__(self, config, data_loader):
+    def __init__(self, config, data_loader1, data_loader2):
         """
         Construct a new Trainer instance.
 
@@ -27,12 +27,12 @@ class Trainer(object):
         - config: object containing command line arguments.
         - data_loader: data iterator
         """
-        self.config = config
-        if config.is_train:
-            self.train_loader = data_loader[0]
-            self.valid_loader = data_loader[1]
-        else:
-            self.test_loader = data_loader
+        
+        
+        self.train_loader = data_loader1[0]
+        self.valid_loader = data_loader1[1]
+        
+        self.test_loader = data_loader2
 
         # network params
         self.num_blocks = config.num_blocks
@@ -47,6 +47,7 @@ class Trainer(object):
         self.best_valid_acc = 0.
         self.init_lr = config.init_lr
         self.lr = self.init_lr
+        print (self.lr)
         self.is_decay = True
         self.momentum = config.momentum
         self.weight_decay = config.weight_decay
@@ -55,7 +56,7 @@ class Trainer(object):
             self.is_decay = False
         else:
             self.lr_decay = [float(x) for x in config.lr_decay.split(',')]
-
+        print (self.lr_decay)
         # other params
         self.ckpt_dir = config.ckpt_dir
         self.logs_dir = config.logs_dir
@@ -75,18 +76,20 @@ class Trainer(object):
         self.model = DenseNet(self.num_blocks, self.num_layers_total,
             self.growth_rate, self.num_classes, self.bottleneck, 
                 self.dropout_rate, self.theta)
-
+       
+       
         print('[*] Number of model parameters: {:,}'.format(
             sum([p.data.nelement() for p in self.model.parameters()])))
 
         # define loss and optimizer
+#self.init_lr
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.init_lr,
-                momentum=self.momentum, weight_decay=self.weight_decay)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.init_lr,momentum=0.9,  weight_decay=1e-4)
 
         if self.num_gpu > 0:
             self.model.cuda()
-            self.criterion.cuda()
+            self.model = torch.nn.DataParallel(self.model, device_ids = range(self.num_gpu))
+           # self.criterion.cuda()
 
         # finally configure tensorboard logging
         if self.use_tensorboard:
@@ -112,7 +115,7 @@ class Trainer(object):
             self.load_checkpoint(best=False)
 
         for epoch in trange(self.start_epoch, self.epochs):
-            
+            self.model.train()
             # decay learning rate
             if self.is_decay:
                 self.anneal_learning_rate(epoch)
@@ -121,6 +124,7 @@ class Trainer(object):
             self.train_one_epoch(epoch)
 
             # evaluate on validation set
+            self.model.eval()
             valid_acc = self.validate(epoch)
 
             is_best = valid_acc > self.best_valid_acc
@@ -129,7 +133,7 @@ class Trainer(object):
                 'epoch': epoch + 1,
                 'state_dict': self.model.state_dict(),
                 'best_valid_acc': self.best_valid_acc}, is_best)
-
+            self.test()
     def test(self):
         """
         Test the model on the held-out test data. 
@@ -187,19 +191,17 @@ class Trainer(object):
         batch_time = AverageMeter()
         losses = AverageMeter()
         accs = AverageMeter()
-
+        self.model.train()       
         tic = time.time()
         for i, (image, target) in enumerate(self.train_loader):
             if self.num_gpu > 0:
                 image = image.cuda()
-                target = target.cuda(async=True)
+                target = target.cuda()
             input_var = torch.autograd.Variable(image)
             target_var = torch.autograd.Variable(target)
-
             # forward pass
             output = self.model(input_var)
-
-            # compute loss & accuracy 
+            loss = 0   
             loss = self.criterion(output, target_var)
             acc = self.accuracy(output.data, target)
             losses.update(loss.data[0], image.size()[0])
@@ -209,24 +211,22 @@ class Trainer(object):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-
             # measure elapsed time
             toc = time.time()
             batch_time.update(toc-tic)
 
             # print to screen
+
             if i % self.print_freq == 0:
                 print('Epoch: [{0}][{1}/{2}]\t'
                     'Time: {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                     'Train Loss: {loss.val:.4f} ({loss.avg:.4f})\t'
                     'Train Acc: {acc.val:.3f} ({acc.avg:.3f})'.format(
                         epoch, i, len(self.train_loader), batch_time=batch_time,
-                        loss=losses, acc=accs))
-
-        # log to tensorboard
+                        loss=losses, acc=accs))        # log to tensorboard
         if self.use_tensorboard:
             log_value('train_loss', losses.avg, epoch)
-            log_value('train_acc', accs.avg, epoch)
+            log_value('train_acc', accses.avg, epoch)
 
 
     def validate(self, epoch):

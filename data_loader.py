@@ -52,20 +52,19 @@ def get_train_valid_loader(data_dir,
     assert ((valid_size >= 0) and (valid_size <= 1)), error_msg1
     assert name in ['cifar10', 'cifar100'], error_msg2
 
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-
+    normalize = transforms.Normalize(mean=[0.4388, 0.4185, 0.3778],
+                                     std=[0.3006, 0.2874, 0.2939])
+   # normalize = transforms.Normalize(mean = [0.5071,0.4867, 0.4408], std = [0.2675, 0.2565, 0.2761])
     # define transforms
     valid_transform = transforms.Compose([
             transforms.ToTensor(),
-            normalize
-        ])
+            normalize])
     if augment:
         train_transform = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
+              transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            normalize
+            normalize    
         ])
     else:
         train_transform = transforms.Compose([
@@ -90,7 +89,9 @@ def get_train_valid_loader(data_dir,
     num_train = len(train_dataset)
     indices = list(range(num_train))
     split = int(np.floor(valid_size * num_train))
-
+    train = train_dataset.train_data
+    print (np.shape(train))
+    print (np.mean(train,axis=(0,1,2)))
     if shuffle == True:
         np.random.seed(random_seed)
         np.random.shuffle(indices)
@@ -102,12 +103,28 @@ def get_train_valid_loader(data_dir,
 
     train_loader = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, sampler=train_sampler, 
-                    num_workers=num_workers, pin_memory=pin_memory)
-
+                    num_workers=num_workers)
+    sum1 = torch.FloatTensor(3).zero_()
+    sum2 = 0
+    sum3 = 0
+    total = 0
+    std = torch.FloatTensor(3).zero_()
+    for num, (inputs, targets) in enumerate(train_loader):
+        total += inputs.size(0)
+        square = torch.mul(inputs,inputs)
+        r = torch.sum(torch.sum(inputs,dim = 2),dim=2)
+        g = torch.sum(torch.sum(square, dim = 2),dim = 2)
+        std += torch.sum(g, dim = 0)
+        sum1 += torch.sum(r, dim = 0) 
+    sum1 = sum1/ (total * 32*32)
+    std = std / (total * 32 * 32)
+    std = std - torch.mul(sum1,sum1)
+    print (sum1)
+    print (total)
+    print (torch.sqrt(std))
     valid_loader = torch.utils.data.DataLoader(valid_dataset, 
                     batch_size=batch_size, sampler=valid_sampler, 
-                    num_workers=num_workers, pin_memory=pin_memory)
-
+                    num_workers=num_workers)
 
     # visualize some images
     if show_sample:
@@ -151,8 +168,8 @@ def get_test_loader(data_dir,
     -------
     - data_loader: test set iterator.
     """
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+    normalize = transforms.Normalize(mean=[0.4388, 0.4185, 0.3778],
+                                     std=[0.3006, 0.2874, 0.2939])
 
     # define transform
     transform = transforms.Compose([
@@ -173,8 +190,8 @@ def get_test_loader(data_dir,
 
     data_loader = torch.utils.data.DataLoader(dataset, 
                                               batch_size=batch_size, 
-                                              shuffle=shuffle, 
+                                              shuffle=False, 
                                               num_workers=num_workers,
-                                              pin_memory=pin_memory)
+                                              )
 
     return data_loader
