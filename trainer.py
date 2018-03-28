@@ -148,7 +148,7 @@ class Trainer(object):
         batch_time = AverageMeter()
 
         # load the best checkpoint
-        self.load_checkpoint(best=True)
+       # self.load_checkpoint(best=True)
 
         tic = time.time()
         for i, (image, target) in enumerate(self.test_loader):

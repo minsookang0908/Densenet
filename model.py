@@ -133,12 +133,13 @@ class DenseNet(nn.Module):
                # print (m.output_channels)
                 n = m.kernel_size[0]  * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0,sqrt(2./n))
+                nn.init.constant(m.bias,0)
   # ================================== #
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant(m.weight,1)
                 nn.init.constant(m.bias,0)
             elif isinstance(m, nn.Linear):
-                nn.init.constant(m.bias,0)
+                m.bias.data.zero_()
     def forward(self, x):
         """
         Run the forward pass of the DenseNet model.
