@@ -18,18 +18,18 @@ def main(config):
         kwargs = {}
 
     # instantiate data loaders
-    if config.is_train:
-        data_loader = get_train_valid_loader(config.data_dir,
+    
+    data_loader1 = get_train_valid_loader(config.data_dir,
             config.dataset, config.batch_size, config.augment, 
             config.random_seed, config.valid_size, config.shuffle, 
             config.show_sample, **kwargs)
-    else:
-        data_loader = get_test_loader(config.data_dir,
+
+    data_loader2 = get_test_loader(config.data_dir,
             config.dataset, config.batch_size, config.shuffle, 
             **kwargs)
 
     # instantiate trainer
-    trainer = Trainer(config, data_loader)
+    trainer = Trainer(config, data_loader1, data_loader2)
 
     # either train
     if config.is_train:
@@ -42,4 +42,6 @@ def main(config):
 
 if __name__ == '__main__':
     config, unparsed = get_config()
+    if config.num_gpu == 1:
+        os.environ['CUDA_VISIBLE_DEVICES']  = str(1)  
     main(config)

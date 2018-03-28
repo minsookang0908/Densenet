@@ -84,7 +84,7 @@ class Trainer(object):
         # define loss and optimizer
 #self.init_lr
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.init_lr,momentum=0.9,  weight_decay=1e-4)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.init_lr,momentum=0.9,nesterov = True, weight_decay=1e-4)
 
         if self.num_gpu > 0:
             self.model.cuda()

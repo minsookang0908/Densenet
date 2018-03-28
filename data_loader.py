@@ -54,7 +54,7 @@ def get_train_valid_loader(data_dir,
 
     normalize = transforms.Normalize(mean=[0.4388, 0.4185, 0.3778],
                                      std=[0.3006, 0.2874, 0.2939])
-   # normalize = transforms.Normalize(mean = [0.5071,0.4867, 0.4408], std = [0.2675, 0.2565, 0.2761])
+   # normalize = transforms.Normalize(mean = [0.485,0.456, 0.406], std = [0.229, 0.224, 0.225])
     # define transforms
     valid_transform = transforms.Compose([
             transforms.ToTensor(),
@@ -171,6 +171,8 @@ def get_test_loader(data_dir,
     normalize = transforms.Normalize(mean=[0.4388, 0.4185, 0.3778],
                                      std=[0.3006, 0.2874, 0.2939])
 
+   # normalize = transforms.Normalize(mean = [0.485,0.456, 0.406], std = [0.229, 0.224, 0.225])
+    #normalize = transforms.Normalize(mean = [0.5071,0.4867, 0.4408], std = [0.2675, 0.2565, 0.2761])
     # define transform
     transform = transforms.Compose([
         transforms.ToTensor(),
